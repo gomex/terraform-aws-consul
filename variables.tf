@@ -60,3 +60,9 @@ variable "spot_price" {
   default     = null
 }
 
+variable "owners" { 
+  description = "The maximum hourly price to pay for EC2 Spot Instances."
+  type        = list
+  default     = ["178520105998"]
+}
+

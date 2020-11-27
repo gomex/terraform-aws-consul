@@ -7,13 +7,21 @@
 # ---------------------------------------------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------------------------------------------------
-# REQUIRE A SPECIFIC TERRAFORM VERSION OR HIGHER
-# ----------------------------------------------------------------------------------------------------------------------
+# PROVIDER AND BACKEND
+# ---------------------------------------------------------------------------------------------------------------------
+provider "aws" {
+  region  = "us-east-1"
+  version = "~> 2.0"
+}
+
 terraform {
-  # This module is now only being tested with Terraform 0.13.x. However, to make upgrading easier, we are setting
-  # 0.12.26 as the minimum version, as that version added support for required_providers with source URLs, making it
-  # forwards compatible with 0.13.x code.
   required_version = ">= 0.12.26"
+  backend "s3" {
+    # Lembre de trocar o bucket para o seu, não pode ser o mesmo nome
+    bucket = "descomplicando-terraform-gomex-tfstates"
+    key    = "terraform-test.tfstate"
+    region = "us-east-1"
+  }
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -34,7 +42,7 @@ data "aws_ami" "consul" {
   most_recent = true
 
   # If we change the AWS Account in which test are run, update this value.
-  owners = ["562637147889"]
+  owners = var.owners
 
   filter {
     name   = "virtualization-type"
@@ -43,7 +51,7 @@ data "aws_ami" "consul" {
 
   filter {
     name   = "is-public"
-    values = ["true"]
+    values = ["false"]
   }
 
   filter {
@@ -82,7 +90,7 @@ module "consul_servers" {
   allowed_ssh_cidr_blocks = ["0.0.0.0/0"]
 
   allowed_inbound_cidr_blocks = ["0.0.0.0/0"]
-  ssh_key_name                = var.ssh_key_name
+  ssh_key_name                = "hashiweek"
 
   tags = [
     {
