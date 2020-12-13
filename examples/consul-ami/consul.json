@@ -2,13 +2,13 @@
   "min_packer_version": "1.5.4",
   "variables": {
     "aws_region": "us-east-1",
-    "consul_version": "1.5.1",
+    "consul_version": "1.9.0",
     "download_url": "{{env `CONSUL_DOWNLOAD_URL`}}"
   },
   "builders": [{
-    "name": "ubuntu16-ami",
+    "name": "ubuntu20-ami",
     "ami_name": "consul-ubuntu-{{isotime | clean_resource_name}}-{{uuid}}",
-    "ami_description": "An Ubuntu 16.04 AMI that has Consul installed.",
+    "ami_description": "An Ubuntu 20.04 AMI that has Consul installed.",
     "instance_type": "t2.micro",
     "region": "{{user `aws_region`}}",
     "type": "amazon-ebs",
@@ -16,14 +16,20 @@
       "filters": {
         "virtualization-type": "hvm",
         "architecture": "x86_64",
-        "name": "*ubuntu-xenial-16.04-amd64-server-*",
+        "name": "ubuntu/images/*ubuntu-focal-20.04-amd64-server-*",
         "block-device-mapping.volume-type": "gp2",
         "root-device-type": "ebs"
       },
       "owners": ["099720109477"],
-      "most_recent": true
+      "most_recent": true     
     },
-    "ssh_username": "ubuntu"
+    "ssh_username": "ubuntu",
+    "tags": {
+      "OS_Version": "Ubuntu 20.04",
+      "Release": "20.4",
+      "Base_AMI_Name": "{{ .SourceAMIName }}",
+      "Extra": "{{ .SourceAMITags.TagName }}"
+    }
   },{
     "name": "ubuntu18-ami",
     "ami_name": "consul-ubuntu-{{isotime | clean_resource_name}}-{{uuid}}",
@@ -43,7 +49,13 @@
       "owners": ["099720109477"],
       "most_recent": true
     },
-    "ssh_username": "ubuntu"
+    "ssh_username": "ubuntu",
+    "tags": {
+      "OS_Version": "Ubuntu 18.04",
+      "Release": "18.4",
+      "Base_AMI_Name": "{{ .SourceAMIName }}",
+      "Extra": "{{ .SourceAMITags.TagName }}"
+    }
   },{
     "name": "amazon-linux-2-ami",
     "ami_name": "consul-amazon-linux-2-{{isotime | clean_resource_name}}-{{uuid}}",
@@ -62,7 +74,13 @@
       "owners": ["amazon"],
       "most_recent": true
     },
-    "ssh_username": "ec2-user"
+    "ssh_username": "ec2-user",
+    "tags": {
+      "OS_Version": "Amazon Linux 2",
+      "Release": "",
+      "Base_AMI_Name": "{{ .SourceAMIName }}",
+      "Extra": "{{ .SourceAMITags.TagName }}"
+    }
   }],
   "provisioners": [{
     "type": "shell",
@@ -84,7 +102,7 @@
     "pause_before": "30s"
   },{
     "type": "shell",
-    "only": ["ubuntu16-ami", "amazon-linux-2-ami"],
+    "only": ["ubuntu20-ami", "amazon-linux-2-ami"],
     "inline": [
       "/tmp/terraform-aws-consul/modules/install-dnsmasq/install-dnsmasq"
     ],
