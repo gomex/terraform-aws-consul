@@ -4,6 +4,7 @@
 #
 # 1. Ubuntu 16.04
 # 2. Amazon Linux 2
+# 3. Ubuntu 20.04
 
 set -e
 
@@ -14,6 +15,7 @@ readonly DEFAULT_DNSMASQ_LISTEN_ADDRESS=""
 
 readonly DNS_MASQ_CONFIG_DIR="/etc/dnsmasq.d"
 readonly CONSUL_DNS_MASQ_CONFIG_FILE="$DNS_MASQ_CONFIG_DIR/10-consul"
+readonly FILE_DNSMASQ='/etc/dnsmasq.conf'
 
 readonly SCRIPT_NAME="$(basename "$0")"
 
@@ -76,6 +78,10 @@ function has_apt_get {
   [[ -n "$(command -v apt-get)" ]]
 }
 
+function has_systemctl_resolved {
+  test $(systemctl is-active systemd-resolved.service) = 'active'
+}
+
 function install_dnsmasq {
   local -r consul_ip="$1"
 
@@ -88,7 +94,7 @@ function install_dnsmasq {
     sudo yum update -y
     sudo yum install -y dnsmasq
     echo "prepend domain-name-servers $consul_ip;" | sudo tee -a "/etc/dhcp/dhclient.conf" > /dev/null
-    echo "conf-dir=$DNS_MASQ_CONFIG_DIR" | sudo tee -a "/etc/dnsmasq.conf" > /dev/null
+    echo "conf-dir=$DNS_MASQ_CONFIG_DIR" | sudo tee -a "$FILE_DNSMASQ" > /dev/null
     sudo chkconfig dnsmasq on
   else
     log_error "Could not find apt-get or yum. Cannot install on this OS."
@@ -112,6 +118,12 @@ server=/${consul_domain}/${consul_ip}#${consul_port}
 listen-address=${dnsmasq_listen_address}
 bind-interfaces
 EOF
+
+if has_systemctl_resolved; then
+    log_info "Restart dnsmasq"
+    sudo systemctl enable --now dnsmasq.service
+fi  
+
 }
 
 function install {
