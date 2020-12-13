@@ -21,10 +21,15 @@
         "root-device-type": "ebs"
       },
       "owners": ["099720109477"],
-      "most_recent": true
-      
+      "most_recent": true     
     },
-    "ssh_username": "ubuntu"
+    "ssh_username": "ubuntu",
+    "tags": {
+      "OS_Version": "Ubuntu 20.04",
+      "Release": "20.4",
+      "Base_AMI_Name": "{{ .SourceAMIName }}",
+      "Extra": "{{ .SourceAMITags.TagName }}"
+    }
   },{
     "name": "ubuntu18-ami",
     "ami_name": "consul-ubuntu-{{isotime | clean_resource_name}}-{{uuid}}",
@@ -44,7 +49,13 @@
       "owners": ["099720109477"],
       "most_recent": true
     },
-    "ssh_username": "ubuntu"
+    "ssh_username": "ubuntu",
+    "tags": {
+      "OS_Version": "Ubuntu 18.04",
+      "Release": "18.4",
+      "Base_AMI_Name": "{{ .SourceAMIName }}",
+      "Extra": "{{ .SourceAMITags.TagName }}"
+    }
   },{
     "name": "amazon-linux-2-ami",
     "ami_name": "consul-amazon-linux-2-{{isotime | clean_resource_name}}-{{uuid}}",
@@ -63,7 +74,13 @@
       "owners": ["amazon"],
       "most_recent": true
     },
-    "ssh_username": "ec2-user"
+    "ssh_username": "ec2-user",
+    "tags": {
+      "OS_Version": "Amazon Linux 2",
+      "Release": "",
+      "Base_AMI_Name": "{{ .SourceAMIName }}",
+      "Extra": "{{ .SourceAMITags.TagName }}"
+    }
   }],
   "provisioners": [{
     "type": "shell",
